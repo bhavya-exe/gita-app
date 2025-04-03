@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import SavedQuotes from "./pages/SavedQuotes";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
+import KarmaStreak from "./pages/KarmaStreak";
 
 // Import our new layout
 import { AppLayout } from "./components/layout/AppLayout";
@@ -26,8 +27,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<AppLayout><Home /></AppLayout>} />
           <Route path="/saved" element={<AppLayout><SavedQuotes /></AppLayout>} />
-          <Route path="/profile" element={<AppLayout><Profile /></AppLayout>} />
+          <Route path="/karma" element={<AppLayout><KarmaStreak /></AppLayout>} />
           <Route path="/chat" element={<AppLayout><Chat /></AppLayout>} />
+          <Route path="/profile" element={<AppLayout><Profile /></AppLayout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

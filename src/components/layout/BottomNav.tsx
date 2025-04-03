@@ -1,11 +1,12 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Home, BookOpen, Bookmark, MessageCircle } from "lucide-react";
+import { Home, BookOpen, Bookmark, MessageCircle, Flame } from "lucide-react";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home },
   { to: "/saved", label: "Saved", icon: Bookmark },
+  { to: "/karma", label: "Karma", icon: Flame },
   { to: "/chat", label: "Chat", icon: MessageCircle },
   { to: "/profile", label: "Profile", icon: BookOpen },
 ];
