@@ -1,4 +1,5 @@
-# Welcome to your Lovable project
+
+# Welcome to your Lovable project - Gita App
 
 ## Project info
 
@@ -59,10 +60,13 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- Capacitor (for mobile app deployment)
 
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/c9fadb34-0ed8-4858-aaae-8579435fb659) and click on Share -> Publish.
+
+For mobile app deployment to app stores, additional steps are required after building the project with Capacitor.
 
 ## Can I connect a custom domain to my Lovable project?
 
