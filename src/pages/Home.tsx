@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BookMarked, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuotes } from "@/hooks/use-quotes";
+import { GitaWidget } from "@/components/GitaWidget";
 
 export default function Home() {
   const { toast } = useToast();
@@ -61,7 +62,21 @@ export default function Home() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 space-y-6">
+      {/* Widget Display */}
+      <div className="relative mb-8">
+        <div 
+          className="absolute inset-0 bg-gradient-to-r from-orange-500/70 to-purple-500/70 rounded-xl -z-10"
+          style={{
+            backgroundImage: `url("/lovable-uploads/614a6b77-73e5-49de-9065-efb45a0bbcde.png")`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.8
+          }}
+        ></div>
+        <GitaWidget />
+      </div>
+
       <div className="mb-4">
         <h2 className="text-2xl font-serif font-semibold text-center">Today's Wisdom</h2>
         <p className="text-muted-foreground text-center">
