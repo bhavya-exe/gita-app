@@ -13,7 +13,7 @@ const navItems = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t flex justify-around py-2">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-sm border-t flex justify-around py-2 z-50">
       {navItems.map(({ to, label, icon: Icon }) => (
         <NavLink
           key={to}
@@ -21,12 +21,12 @@ export function BottomNav() {
           className={({ isActive }) =>
             `flex flex-col items-center p-2 ${
               isActive
-                ? "text-primary"
+                ? "text-primary relative after:content-[''] after:absolute after:w-1.5 after:h-1.5 after:bg-primary after:rounded-full after:bottom-0"
                 : "text-muted-foreground hover:text-foreground"
             }`
           }
         >
-          <Icon size={20} />
+          <Icon size={22} />
           <span className="text-xs mt-1">{label}</span>
         </NavLink>
       ))}
