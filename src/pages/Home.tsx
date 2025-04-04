@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuotes } from "@/hooks/use-quotes";
 import { useDateTime } from "@/hooks/use-date-time";
 import { format } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
   const { toast } = useToast();
@@ -19,9 +20,14 @@ export default function Home() {
     verse_number: number;
     explanation: string;
   } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setQuote(getRandomQuote());
+    // Simulate loading delay
+    setTimeout(() => {
+      setQuote(getRandomQuote());
+      setIsLoading(false);
+    }, 800);
   }, []);
 
   const handleSaveQuote = () => {
@@ -59,12 +65,29 @@ export default function Home() {
     }
   };
 
-  if (!quote) {
-    return <div className="flex justify-center items-center h-[70vh]">Loading...</div>;
-  }
-
   // Format the date for display
   const formattedDate = format(currentDate, "EEEE, MMMM d");
+
+  if (isLoading) {
+    return (
+      <div className="p-4 pb-20 space-y-6">
+        <div className="mb-6 pt-2">
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <Skeleton className="h-48 w-full rounded-xl" />
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!quote) {
+    return <div className="flex justify-center items-center h-[70vh]">Failed to load wisdom</div>;
+  }
 
   return (
     <div className="p-4 pb-20 space-y-6">
@@ -76,19 +99,10 @@ export default function Home() {
 
       {/* Today's Wisdom Section */}
       <div className="relative mb-6 overflow-hidden rounded-xl">
-        <div 
-          className="absolute inset-0 bg-gradient-to-br from-purple-500/90 to-indigo-800/90"
-          style={{
-            backgroundImage: `url("/lovable-uploads/74aa5e8e-11f9-42b8-9989-e940fcfaa3ba.png")`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundBlendMode: 'overlay',
-          }}
-        ></div>
-        <div className="relative p-6 text-white">
-          <h2 className="text-xl font-medium mb-1">Today's Wisdom</h2>
+        <div className="bg-gradient-to-br from-purple-500 to-indigo-800 p-6">
+          <h2 className="text-xl font-medium mb-1 text-white">Today's Wisdom</h2>
           <p className="font-serif italic text-white/80 mb-2">"{quote.verse.substring(0, 80)}..."</p>
-          <p className="text-sm font-medium">
+          <p className="text-sm font-medium text-white">
             Bhagavad Gita {quote.chapter}:{quote.verse_number}
           </p>
           <div className="mt-4 flex gap-3">
@@ -103,7 +117,6 @@ export default function Home() {
               size="sm"
               variant="outline" 
               className="border-white/30 bg-white/10 hover:bg-white/20 text-white"
-              onClick={handleShareQuote}
             >
               Listen
             </Button>
@@ -158,14 +171,7 @@ export default function Home() {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Ask About...</h2>
         <div className="grid grid-cols-2 gap-3">
-          <div 
-            className="relative overflow-hidden rounded-xl aspect-[4/3] flex items-end"
-            style={{
-              backgroundImage: `url("/lovable-uploads/72e06918-b3f2-491b-a544-dda7717241fa.png")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          >
+          <div className="relative overflow-hidden rounded-xl aspect-[4/3] flex items-end bg-gradient-to-br from-purple-400 to-violet-600">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
             <div className="relative p-3 text-white">
               <p className="font-medium">Karma</p>
@@ -175,14 +181,7 @@ export default function Home() {
             </div>
           </div>
           
-          <div 
-            className="relative overflow-hidden rounded-xl aspect-[4/3] flex items-end"
-            style={{
-              backgroundImage: `url("/lovable-uploads/d43f65bd-52e2-4b2b-bbb7-a50e0d50147e.png")`,
-              backgroundSize: 'cover', 
-              backgroundPosition: 'center',
-            }}
-          >
+          <div className="relative overflow-hidden rounded-xl aspect-[4/3] flex items-end bg-gradient-to-br from-amber-400 to-orange-600">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
             <div className="relative p-3 text-white">
               <p className="font-medium">Dharma</p>
