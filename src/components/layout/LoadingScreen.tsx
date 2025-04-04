@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Loader } from "lucide-react";
@@ -34,18 +33,32 @@ export function LoadingScreen({ onLoadComplete }: LoadingScreenProps) {
   }, [onLoadComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background">
+    <div 
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center" 
+      style={{ backgroundColor: '#F5E6D3' }}
+    >
       <div className="max-w-md w-full px-6 flex flex-col items-center">
-        <div className="flex items-center gap-2 mb-10">
-          <img src="/logo.svg" alt="Gita Wisdom" className="w-10 h-10" />
-          <h1 className="text-2xl font-bold">Gita Wisdom</h1>
+        <div className="w-80 h-80 rounded-3xl overflow-hidden mb-8 shadow-xl">
+          <img 
+            src="/bhagavad-gita.jpg" 
+            alt="Bhagavad Gita" 
+            className="w-full h-full object-cover"
+          />
         </div>
         
-        <Progress value={progress} className="w-full h-2 mb-4" />
+        <div className="w-full">
+          <Progress 
+            value={progress} 
+            className="w-full h-2.5 mb-4" 
+            style={{
+              backgroundColor: 'rgba(139, 69, 19, 0.2)'
+            }}
+          />
+        </div>
         
         <div className="flex items-center">
-          <Loader className="animate-spin mr-2" size={16} />
-          <p className="text-sm text-muted-foreground">
+          <Loader className="animate-spin mr-2 text-amber-800" size={16} />
+          <p className="text-sm text-amber-900">
             Loading wisdom...{progress}%
           </p>
         </div>
