@@ -1,42 +1,103 @@
-
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookMarked, Share2, ArrowRight, BookOpen, PenTool, ArrowUpRight } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useQuotes } from "@/hooks/use-quotes";
-import { useDateTime } from "@/hooks/use-date-time";
+import { BookMarked, Share2, ArrowRight, BookOpen, PenTool, ArrowUpRight, LogIn, MessageCircle, Timer, RefreshCw } from "lucide-react";
+import { toast } from 'sonner';
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+
+interface DailyQuote {
+  text: string;
+  author: string;
+  date: string;
+}
+
+interface GitaQuote {
+  verse: string;
+  translation: string;
+  chapter: number;
+  verse_number: number;
+  explanation: string;
+}
 
 export default function Home() {
-  const { toast } = useToast();
-  const { getRandomQuote, saveQuote } = useQuotes();
-  const currentDate = useDateTime();
-  const [quote, setQuote] = useState<{
-    verse: string;
-    translation: string;
-    chapter: number;
-    verse_number: number;
-    explanation: string;
-  } | null>(null);
+  const currentDate = new Date();
+  const [quote, setQuote] = useState<GitaQuote | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const [dailyQuote, setDailyQuote] = useState<DailyQuote | null>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Simulate loading delay
     setTimeout(() => {
-      setQuote(getRandomQuote());
+      setQuote({
+        verse: "The mind is everything. What you think you become.",
+        translation: "मन एव मनुष्याणां कारणं बन्धमोक्षयोः",
+        chapter: 6,
+        verse_number: 5,
+        explanation: "The mind is the cause of both bondage and liberation."
+      });
       setIsLoading(false);
     }, 800);
   }, []);
 
+  useEffect(() => {
+    loadDailyQuote();
+  }, []);
+
+  const loadDailyQuote = () => {
+    setIsLoading(true);
+    const quotes = [
+      {
+        text: "The mind is everything. What you think you become.",
+        author: "Buddha",
+        date: new Date().toISOString()
+      },
+      {
+        text: "Peace comes from within. Do not seek it without.",
+        author: "Buddha",
+        date: new Date().toISOString()
+      },
+      {
+        text: "The only way to do great work is to love what you do.",
+        author: "Steve Jobs",
+        date: new Date().toISOString()
+      }
+    ];
+    
+    const savedQuote = localStorage.getItem('dailyQuote');
+    const today = new Date().toDateString();
+    
+    if (savedQuote) {
+      const parsedQuote = JSON.parse(savedQuote);
+      if (new Date(parsedQuote.date).toDateString() === today) {
+        setDailyQuote(parsedQuote);
+        setIsLoading(false);
+        return;
+      }
+    }
+    
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    setDailyQuote(randomQuote);
+    localStorage.setItem('dailyQuote', JSON.stringify(randomQuote));
+    setIsLoading(false);
+  };
+
   const handleSaveQuote = () => {
     if (quote) {
-      saveQuote(quote);
-      toast({
-        title: "Quote saved",
-        description: "This quote has been added to your saved quotes",
+      const savedQuotes = JSON.parse(localStorage.getItem('savedQuotes') || '[]');
+      savedQuotes.push({
+        id: Date.now().toString(),
+        text: `${quote.verse}\n\n${quote.translation}`,
+        source: `Bhagavad Gita Ch.${quote.chapter}, Verse ${quote.verse_number}`,
+        date: new Date().toISOString()
       });
+      localStorage.setItem('savedQuotes', JSON.stringify(savedQuotes));
+      toast.success(t('quoteSaved'));
     }
   };
 
@@ -49,20 +110,19 @@ export default function Home() {
         text: `${quote.verse}\n\n${quote.translation}\n\n~ Bhagavad Gita Ch.${quote.chapter}, Verse ${quote.verse_number}`,
         url: window.location.href,
       }).catch(() => {
-        toast({
-          title: "Share failed",
-          description: "Could not share this quote",
-        });
+        toast.error(t('shareFailed'));
       });
     } else {
       navigator.clipboard.writeText(
         `${quote.verse}\n\n${quote.translation}\n\n~ Bhagavad Gita Ch.${quote.chapter}, Verse ${quote.verse_number}`
       );
-      toast({
-        title: "Copied to clipboard",
-        description: "Quote has been copied to clipboard",
-      });
+      toast.success(t('quoteCopied'));
     }
+  };
+
+  const refreshQuote = () => {
+    loadDailyQuote();
+    toast.success(t('quoteRefreshed'));
   };
 
   // Format the date for display
@@ -70,153 +130,198 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="p-4 pb-20 space-y-6">
-        <div className="mb-6 pt-2">
-          <Skeleton className="h-8 w-48 mb-2" />
-          <Skeleton className="h-4 w-32" />
+      <div className="container max-w-md mx-auto p-4 space-y-6">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Namaste</h1>
+            <p className="text-muted-foreground">{format(currentDate, "EEEE, MMMM d")}</p>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigate('/profile')}
+          >
+            <LogIn className="h-4 w-4" />
+          </Button>
         </div>
-        <Skeleton className="h-48 w-full rounded-xl" />
+
+        {/* Login Section */}
+        <Card className="bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium">{t('welcome')}</h3>
+                <p className="text-sm text-muted-foreground">{t('signInToTrack')}</p>
+              </div>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  navigate('/profile');
+                }}
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                {t('signIn')}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Featured Content */}
         <div className="space-y-4">
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-24 w-full rounded-lg" />
-          <Skeleton className="h-24 w-full rounded-lg" />
+          <h2 className="text-2xl font-bold">{t('dailyWisdom')}</h2>
+          <Card>
+            <CardContent className="p-6">
+              <Skeleton className="h-4 w-full mb-4" />
+              <Skeleton className="h-4 w-3/4" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold">{t('beginYourJourney')}</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <Button 
+              variant="outline" 
+              className="h-24 flex flex-col items-center justify-center space-y-2"
+              onClick={() => navigate('/chat')}
+            >
+              <MessageCircle className="h-6 w-6 mb-2" />
+              <span className="text-lg">{t('chat')}</span>
+              <span className="text-sm text-muted-foreground">{t('seekGuidance')}</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-24 flex flex-col items-center justify-center space-y-2"
+              onClick={() => navigate('/karma')}
+            >
+              <ArrowUpRight className="h-6 w-6 mb-2" />
+              <span className="text-lg">Karma</span>
+              <span className="text-sm text-muted-foreground">Track your actions</span>
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
   if (!quote) {
-    return <div className="flex justify-center items-center h-[70vh]">Failed to load wisdom</div>;
+    return <div className="flex justify-center items-center h-[70vh]">{t('failedToLoad')}</div>;
   }
 
   return (
-    <div className="p-4 pb-20 space-y-6">
-      {/* Greeting Section */}
-      <div className="mb-6 pt-2">
-        <h1 className="text-3xl font-bold">Namaste.</h1>
-        <p className="text-muted-foreground">{formattedDate}</p>
-      </div>
-
-      {/* Today's Wisdom Section */}
-      <div className="relative mb-6 overflow-hidden rounded-xl">
-        <div className="bg-gradient-to-br from-purple-500 to-indigo-800 p-6">
-          <h2 className="text-xl font-medium mb-1 text-white">Today's Wisdom</h2>
-          <p className="font-serif italic text-white/80 mb-2">"{quote.verse.substring(0, 80)}..."</p>
-          <p className="text-sm font-medium text-white">
-            Bhagavad Gita {quote.chapter}:{quote.verse_number}
-          </p>
-          <div className="mt-4 flex gap-3">
-            <Button 
-              size="sm" 
-              className="bg-amber-500 hover:bg-amber-600 text-black font-medium"
-              onClick={() => window.location.href = "#full-quote"}
-            >
-              Read
-            </Button>
-            <Button 
-              size="sm"
-              variant="outline" 
-              className="border-white/30 bg-white/10 hover:bg-white/20 text-white"
-            >
-              Listen
-            </Button>
-          </div>
+    <div className="container max-w-md mx-auto p-4 space-y-6">
+      {/* Top Bar */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Namaste</h1>
+          <p className="text-muted-foreground">{format(currentDate, "EEEE, MMMM d")}</p>
         </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => navigate('/profile')}
+        >
+          <LogIn className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Daily Activities */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Daily Practice</h2>
-        
-        <Card className="overflow-hidden bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-cyan-950/40 dark:to-blue-950/40">
-          <CardContent className="p-0">
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-cyan-500/20">
-                  <PenTool size={20} className="text-cyan-600 dark:text-cyan-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium">Spiritual Journal</h3>
-                  <p className="text-xs text-muted-foreground">1 min • Reflect on your journey</p>
-                </div>
-              </div>
-              <Button size="icon" variant="ghost" className="rounded-full">
-                <ArrowUpRight size={18} />
-              </Button>
+      {/* Login Section */}
+      <Card className="bg-primary/5">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium">{t('welcome')}</h3>
+              <p className="text-sm text-muted-foreground">{t('signInToTrack')}</p>
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="overflow-hidden bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-950/40 dark:to-orange-950/40">
-          <CardContent className="p-0">
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-amber-500/20">
-                  <BookOpen size={20} className="text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="font-medium">Your Verse</h3>
-                  <p className="text-xs text-muted-foreground">2 min • Daily verse study</p>
-                </div>
-              </div>
-              <Button size="icon" variant="ghost" className="rounded-full">
-                <ArrowUpRight size={18} />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            <Button 
+              variant="outline"
+              onClick={() => {
+                navigate('/profile');
+              }}
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              {t('signIn')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Ask About Topics */}
+      {/* Featured Content */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Ask About...</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="relative overflow-hidden rounded-xl aspect-[4/3] flex items-end bg-gradient-to-br from-purple-400 to-violet-600">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-            <div className="relative p-3 text-white">
-              <p className="font-medium">Karma</p>
-              <p className="text-xs text-white/70 flex items-center gap-1">
-                <span>47,652</span>
-              </p>
-            </div>
-          </div>
-          
-          <div className="relative overflow-hidden rounded-xl aspect-[4/3] flex items-end bg-gradient-to-br from-amber-400 to-orange-600">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-            <div className="relative p-3 text-white">
-              <p className="font-medium">Dharma</p>
-              <p className="text-xs text-white/70 flex items-center gap-1">
-                <span>130,289</span>
-              </p>
-            </div>
-          </div>
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">{t('dailyWisdom')}</h2>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={refreshQuote}
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
-      </div>
-
-      {/* Full Quote Section */}
-      <div id="full-quote" className="mt-8 pt-4">
-        <Card className="border border-slate-200 dark:border-slate-800">
+        <Card>
           <CardContent className="p-6">
-            <h2 className="text-xl font-serif font-semibold mb-4">
-              Chapter {quote.chapter}, Verse {quote.verse_number}
-            </h2>
-            <p className="mb-4 font-serif italic">{quote.verse}</p>
-            <p className="mb-6 font-medium">{quote.translation}</p>
-            <h3 className="text-lg font-semibold mb-2">Explanation</h3>
-            <p className="text-muted-foreground">{quote.explanation}</p>
-            
-            <div className="flex gap-4 justify-start mt-6">
-              <Button variant="outline" onClick={handleSaveQuote}>
-                <BookMarked className="mr-2" size={18} />
-                Save
-              </Button>
-              <Button variant="outline" onClick={handleShareQuote}>
-                <Share2 className="mr-2" size={18} />
-                Share
-              </Button>
-            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center min-h-[100px]">
+                <LoadingSpinner size={32} />
+              </div>
+            ) : dailyQuote ? (
+              <div className="space-y-4">
+                <p className="text-lg">{dailyQuote.text}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-muted-foreground">- {dailyQuote.author}</p>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleSaveQuote}
+                    >
+                      <BookMarked className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleShareQuote}
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center min-h-[100px]">
+                <LoadingSpinner size={32} />
+              </div>
+            )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">{t('beginYourJourney')}</h2>
+        <div className="grid grid-cols-2 gap-4">
+          <Button 
+            variant="outline" 
+            className="h-24 flex flex-col items-center justify-center space-y-2"
+            onClick={() => navigate('/chat')}
+          >
+            <MessageCircle className="h-6 w-6 mb-2" />
+            <span className="text-lg">{t('chat')}</span>
+            <span className="text-sm text-muted-foreground">{t('seekGuidance')}</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="h-24 flex flex-col items-center justify-center space-y-2"
+            onClick={() => navigate('/karma')}
+          >
+            <ArrowUpRight className="h-6 w-6 mb-2" />
+            <span className="text-lg">Karma</span>
+            <span className="text-sm text-muted-foreground">Track your actions</span>
+          </Button>
+        </div>
       </div>
     </div>
   );

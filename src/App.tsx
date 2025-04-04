@@ -1,40 +1,36 @@
-
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { LanguageProvider } from "./contexts/LanguageContext";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "./components/ui/sonner";
 
 // Import our new pages
 import Home from "./pages/Home";
-import SavedQuotes from "./pages/SavedQuotes";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
-import KarmaStreak from "./pages/KarmaStreak";
+import Karma from "./pages/Karma";
+import Navbar from "@/components/Navbar";
 
-// Import our new layout
-import { AppLayout } from "./components/layout/AppLayout";
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<AppLayout><Home /></AppLayout>} />
-          <Route path="/saved" element={<AppLayout><SavedQuotes /></AppLayout>} />
-          <Route path="/karma" element={<AppLayout><KarmaStreak /></AppLayout>} />
-          <Route path="/chat" element={<AppLayout><Chat /></AppLayout>} />
-          <Route path="/profile" element={<AppLayout><Profile /></AppLayout>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <LanguageProvider>
+        <Router>
+          <div className="min-h-screen bg-background">
+            <main className="container mx-auto px-4 pb-20">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/karma" element={<Karma />} />
+              </Routes>
+            </main>
+            <Navbar />
+          </div>
+          <Toaster />
+        </Router>
+      </LanguageProvider>
+    </ThemeProvider>
+  );
+}
 
 export default App;
