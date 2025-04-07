@@ -288,7 +288,7 @@ export default function Home() {
               }}
             >
               <LogIn className="h-4 w-4 mr-2" />
-              {t('signIn')}
+              {t('signIn')}/{t('login')}
             </Button>
           </div>
         </CardContent>

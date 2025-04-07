@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Sun, MoonStar, Globe } from "lucide-react";
+import { Sun, MoonStar, Globe } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -23,7 +23,7 @@ export function SettingsMenu({ onClose }: SettingsMenuProps) {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>{t('settings')}</CardTitle>
           <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
