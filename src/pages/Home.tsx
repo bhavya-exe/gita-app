@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookMarked, Share2, LogIn, MessageCircle, RefreshCw } from "lucide-react";
+import { BookMarked, Share2, LogIn, MessageCircle, RefreshCw, ArrowUpRight } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
