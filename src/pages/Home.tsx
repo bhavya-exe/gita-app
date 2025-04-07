@@ -151,8 +151,8 @@ export default function Home() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-medium">{t('welcome')}</h3>
-                <p className="text-sm text-muted-foreground">{t('signInToTrack')}</p>
+                <h3 className="font-medium">Welcome</h3>
+                <p className="text-sm text-muted-foreground">Sign in to track your progress</p>
               </div>
               <Button 
                 variant="outline"
@@ -161,7 +161,7 @@ export default function Home() {
                 }}
               >
                 <LogIn className="h-4 w-4 mr-2" />
-                {t('signIn')}
+                Sign In
               </Button>
             </div>
           </CardContent>
@@ -169,7 +169,7 @@ export default function Home() {
 
         {/* Featured Content */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">{t('dailyWisdom')}</h2>
+          <h2 className="text-2xl font-bold">Daily Wisdom</h2>
           <Card>
             <CardContent className="p-6">
               <Skeleton className="h-4 w-full mb-4" />
@@ -180,7 +180,7 @@ export default function Home() {
 
         {/* Quick Actions */}
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold">{t('beginYourJourney')}</h2>
+          <h2 className="text-2xl font-bold">Begin Your Journey</h2>
           <div className="grid grid-cols-2 gap-4">
             <Button 
               variant="outline" 
@@ -188,8 +188,8 @@ export default function Home() {
               onClick={() => navigate('/chat')}
             >
               <MessageCircle className="h-6 w-6 mb-2" />
-              <span className="text-lg">{t('chat')}</span>
-              <span className="text-sm text-muted-foreground">{t('seekGuidance')}</span>
+              <span className="text-lg">Chat</span>
+              <span className="text-sm text-muted-foreground">Seek Guidance</span>
             </Button>
             <Button 
               variant="outline" 
@@ -207,7 +207,11 @@ export default function Home() {
   }
 
   if (!quote) {
-    return <div className="flex justify-center items-center h-[70vh]">{t('failedToLoad')}</div>;
+    return (
+      <div className="flex justify-center items-center h-[70vh]">
+        <LoadingSpinner size={40} className="text-primary" />
+      </div>
+    );
   }
 
   return (
