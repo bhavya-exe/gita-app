@@ -1,13 +1,15 @@
+
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookMarked, Share2, ArrowRight, BookOpen, PenTool, ArrowUpRight, LogIn, MessageCircle, Timer, RefreshCw } from "lucide-react";
+import { BookMarked, Share2, LogIn, MessageCircle, RefreshCw } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import KarmaPreview from "@/components/KarmaPreview";
 
 interface DailyQuote {
   text: string;
@@ -252,6 +254,12 @@ export default function Home() {
         </CardContent>
       </Card>
 
+      {/* Karma Preview Section */}
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Karma Tracker</h2>
+        <KarmaPreview />
+      </div>
+
       {/* Featured Content */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -306,24 +314,17 @@ export default function Home() {
       {/* Quick Actions */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">{t('beginYourJourney')}</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <Button 
             variant="outline" 
-            className="h-24 flex flex-col items-center justify-center space-y-2"
+            className="h-20 flex items-center justify-between px-4"
             onClick={() => navigate('/chat')}
           >
-            <MessageCircle className="h-6 w-6 mb-2" />
-            <span className="text-lg">{t('chat')}</span>
-            <span className="text-sm text-muted-foreground">{t('seekGuidance')}</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            className="h-24 flex flex-col items-center justify-center space-y-2"
-            onClick={() => navigate('/karma')}
-          >
-            <ArrowUpRight className="h-6 w-6 mb-2" />
-            <span className="text-lg">Karma</span>
-            <span className="text-sm text-muted-foreground">Track your actions</span>
+            <div className="flex flex-col items-start">
+              <span className="text-lg">{t('chat')}</span>
+              <span className="text-sm text-muted-foreground">{t('seekGuidance')}</span>
+            </div>
+            <MessageCircle className="h-6 w-6" />
           </Button>
         </div>
       </div>

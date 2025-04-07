@@ -1,6 +1,7 @@
+
 import { Link, useLocation } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
-import { Home, User, MessageSquare, Flame } from "lucide-react";
+import { Home, User, MessageSquare } from "lucide-react";
 
 export default function Navbar() {
   const { t } = useLanguage();
@@ -9,7 +10,6 @@ export default function Navbar() {
   const navItems = [
     { path: "/", icon: Home, label: "home" },
     { path: "/chat", icon: MessageSquare, label: "chat" },
-    { path: "/karma", icon: Flame, label: "karma" },
     { path: "/profile", icon: User, label: "profile" },
   ];
 
@@ -37,4 +37,4 @@ export default function Navbar() {
       </div>
     </nav>
   );
-} 
+}
