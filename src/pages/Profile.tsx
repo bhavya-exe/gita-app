@@ -10,6 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from 'sonner';
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface UserStats {
   totalPractices: number;
@@ -39,7 +40,7 @@ interface Chapter {
   id: number;
   title: string;
   verses: number;
-  audioUrl: string;
+  content?: string;
 }
 
 interface Translation {
@@ -75,9 +76,19 @@ const translations: Translation[] = [
 ];
 
 const chapters: Chapter[] = [
-  { id: 1, title: 'Arjuna Vishada Yoga', verses: 47, audioUrl: '/audio/chapter1.mp3' },
-  { id: 2, title: 'Sankhya Yoga', verses: 72, audioUrl: '/audio/chapter2.mp3' },
-  // Add more chapters as needed
+  { 
+    id: 1, 
+    title: 'Arjuna Vishada Yoga', 
+    verses: 47,
+    content: "Dhritarashtra said: O Sanjaya, after my sons and the sons of Pandu assembled in the place of pilgrimage at Kurukshetra, desiring to fight, what did they do?\n\nSanjaya said: O King, after looking over the army arranged in military formation by the sons of Pandu, King Duryodhana went to his teacher and spoke the following words..."
+  },
+  { 
+    id: 2, 
+    title: 'Sankhya Yoga', 
+    verses: 72,
+    content: "Sanjaya said: Seeing Arjuna full of compassion, his mind depressed, his eyes full of tears, Madhusudana, Krishna, spoke the following words.\n\nThe Supreme Personality of Godhead said: My dear Arjuna, how have these impurities come upon you? They are not at all befitting a man who knows the value of life. They lead not to higher planets but to infamy..."
+  },
+  // More chapters would be added here
 ];
 
 export default function Profile() {
@@ -96,9 +107,9 @@ export default function Profile() {
     favoriteQuotes: 0
   });
   const [selectedTranslation, setSelectedTranslation] = useState<string>('swamiPrabhupada');
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [currentChapter, setCurrentChapter] = useState<Chapter | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
+  const [isReadingMode, setIsReadingMode] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     loadSavedQuotes();
@@ -175,291 +186,315 @@ export default function Profile() {
     toast.success(t('quoteCopied'));
   };
 
-  const handlePlayAudio = (chapter: Chapter) => {
-    if (currentChapter?.id === chapter.id) {
-      if (isPlaying) {
-        audioRef.current?.pause();
-      } else {
-        audioRef.current?.play();
-      }
-      setIsPlaying(!isPlaying);
-    } else {
-      setCurrentChapter(chapter);
-      setIsPlaying(true);
-      if (audioRef.current) {
-        audioRef.current.src = chapter.audioUrl;
-        audioRef.current.play();
-      }
-    }
+  const handleReadChapter = (chapter: Chapter) => {
+    setIsLoading(true);
+    setSelectedChapter(chapter);
+    setIsReadingMode(true);
+    
+    // Simulate loading content
+    setTimeout(() => {
+      setIsLoading(false);
+      // Play meditation bell sound to indicate content is ready
+      const bell = new Audio('/sounds/meditation-bell.mp3');
+      bell.volume = 0.3;
+      bell.play().catch(e => console.log('Audio play failed:', e));
+    }, 1000);
+  };
+
+  const closeReadingMode = () => {
+    setIsReadingMode(false);
+    setSelectedChapter(null);
   };
 
   return (
     <div className="container max-w-md mx-auto p-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('profile')}</h1>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate('/profile')}
-        >
-          {t('editProfile')}
-        </Button>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('yourStatistics')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">{t('totalPractices')}</span>
-              <span className="text-sm font-medium">{stats.totalPractices}</span>
+      {isReadingMode && selectedChapter ? (
+        <div className="fixed inset-0 bg-background z-50 overflow-y-auto p-4">
+          <div className="max-w-md mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-2xl font-bold">Chapter {selectedChapter.id}: {selectedChapter.title}</h1>
+              <Button variant="ghost" size="sm" onClick={closeReadingMode}>
+                <ChevronRight className="h-5 w-5 rotate-180" />
+              </Button>
             </div>
-            <Progress value={calculatePracticeProgress()} className="h-2" />
+            
+            {isLoading ? (
+              <div className="flex justify-center items-center h-[70vh]">
+                <LoadingSpinner size={40} />
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <BookOpen className="h-4 w-4" />
+                  <span>{selectedChapter.verses} verses</span>
+                </div>
+                
+                <div className="prose prose-lg dark:prose-invert max-w-none">
+                  {selectedChapter.content?.split('\n\n').map((paragraph, i) => (
+                    <p key={i} className="mb-4 leading-relaxed">{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">{t('profile')}</h1>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/profile')}
+            >
+              {t('editProfile')}
+            </Button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">{t('completedPractices')}</p>
-              <p className="text-2xl font-bold">{stats.completedPractices}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">{t('savedQuotes')}</p>
-              <p className="text-2xl font-bold">{stats.savedQuotes}</p>
-            </div>
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('yourStatistics')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">{t('totalPractices')}</span>
+                  <span className="text-sm font-medium">{stats.totalPractices}</span>
+                </div>
+                <Progress value={calculatePracticeProgress()} className="h-2" />
+              </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">{t('currentStreak')}</p>
-              <p className="text-2xl font-bold">{stats.currentStreak} days</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">{t('longestStreak')}</p>
-              <p className="text-2xl font-bold">{stats.longestStreak} days</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">{t('completedPractices')}</p>
+                  <p className="text-2xl font-bold">{stats.completedPractices}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">{t('savedQuotes')}</p>
+                  <p className="text-2xl font-bold">{stats.savedQuotes}</p>
+                </div>
+              </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bookmark className="h-5 w-5" />
-            {t('savedQuotes')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {savedQuotes.length === 0 ? (
-            <p className="text-center text-muted-foreground">{t('noSavedQuotes')}</p>
-          ) : (
-            <div className="space-y-4">
-              {savedQuotes.map((quote) => (
-                <div
-                  key={quote.id}
-                  className="p-4 bg-card rounded-lg shadow"
-                >
-                  <p className="text-lg mb-2">{quote.text}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{quote.source}</span>
-                    <div className="flex items-center gap-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">{t('currentStreak')}</p>
+                  <p className="text-2xl font-bold">{stats.currentStreak} days</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">{t('longestStreak')}</p>
+                  <p className="text-2xl font-bold">{stats.longestStreak} days</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bookmark className="h-5 w-5" />
+                {t('savedQuotes')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {savedQuotes.length === 0 ? (
+                <p className="text-center text-muted-foreground">{t('noSavedQuotes')}</p>
+              ) : (
+                <div className="space-y-4">
+                  {savedQuotes.map((quote) => (
+                    <div
+                      key={quote.id}
+                      className="p-4 bg-card rounded-lg shadow"
+                    >
+                      <p className="text-lg mb-2">{quote.text}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">{quote.source}</span>
+                        <div className="flex items-center gap-2">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedQuote(quote)}
+                              >
+                                <MessageCircle className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>{t('shareQuote')}</DialogTitle>
+                              </DialogHeader>
+                              <div className="grid grid-cols-2 gap-2 mt-4">
+                                <Button onClick={() => handleShare('twitter')}>
+                                  <Twitter className="h-4 w-4 mr-2" />
+                                  Twitter
+                                </Button>
+                                <Button onClick={() => handleShare('facebook')}>
+                                  <Facebook className="h-4 w-4 mr-2" />
+                                  Facebook
+                                </Button>
+                                <Button onClick={handleCopy} className="col-span-2">
+                                  <Copy className="h-4 w-4 mr-2" />
+                                  {t('copy')}
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setSelectedQuote(quote)}
+                            onClick={() => handleDeleteQuote(quote.id)}
                           >
-                            <MessageCircle className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>{t('shareQuote')}</DialogTitle>
-                          </DialogHeader>
-                          <div className="grid grid-cols-2 gap-2 mt-4">
-                            <Button onClick={() => handleShare('twitter')}>
-                              <Twitter className="h-4 w-4 mr-2" />
-                              Twitter
-                            </Button>
-                            <Button onClick={() => handleShare('facebook')}>
-                              <Facebook className="h-4 w-4 mr-2" />
-                              Facebook
-                            </Button>
-                            <Button onClick={handleCopy} className="col-span-2">
-                              <Copy className="h-4 w-4 mr-2" />
-                              {t('copy')}
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteQuote(quote.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              )}
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            {t('settings')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Languages className="h-5 w-5" />
-              <span>{t('language')}</span>
-            </div>
-            <Select value={language} onValueChange={(value) => setLanguage(value as 'en' | 'hi' | 'sa')}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('language')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="hi">हिंदी</SelectItem>
-                <SelectItem value="sa">संस्कृतम्</SelectItem>
-              </SelectContent>
-            </Select>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                {t('settings')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Languages className="h-5 w-5" />
+                  <span>{t('language')}</span>
+                </div>
+                <Select value={language} onValueChange={(value) => setLanguage(value as 'en' | 'hi' | 'sa')}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder={t('language')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="hi">हिंदी</SelectItem>
+                    <SelectItem value="sa">संस्कृतम्</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>{t('dailyReminders')}</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {t('receiveDailyWisdom')}
+                  </p>
+                </div>
+                <Switch
+                  checked={notifications}
+                  onCheckedChange={toggleNotifications}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-3">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => {
+                toast.success("Coming Soon: This feature will be available in the next update!");
+              }}
+            >
+              <MessageCircle className="mr-2" size={18} /> Conversation History
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => {
+                toast.success("Coming Soon: Advanced preferences will be available soon!");
+              }}
+            >
+              <Settings className="mr-2" size={18} /> Advanced Preferences
+            </Button>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>{t('dailyReminders')}</Label>
-              <p className="text-sm text-muted-foreground">
-                {t('receiveDailyWisdom')}
-              </p>
-            </div>
-            <Switch
-              checked={notifications}
-              onCheckedChange={toggleNotifications}
-            />
+          <div className="mt-8 text-center">
+            <p className="text-xs text-muted-foreground">App Version 1.0.1</p>
+            <p className="text-xs text-muted-foreground">Gita Wisdom App</p>
           </div>
-        </CardContent>
-      </Card>
 
-      <div className="space-y-3">
-        <Button 
-          variant="outline" 
-          className="w-full justify-start"
-          onClick={() => {
-            toast.success("Coming Soon: This feature will be available in the next update!");
-          }}
-        >
-          <MessageCircle className="mr-2" size={18} /> Conversation History
-        </Button>
+          {/* Gita Reading Section */}
+          <div className="mt-8 space-y-6">
+            <h2 className="text-2xl font-bold">{t('gitaReading.title')}</h2>
+            
+            {/* Translation Selection */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                {t('gitaReading.selectTranslation')}
+              </label>
+              <Select
+                value={selectedTranslation}
+                onValueChange={setSelectedTranslation}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('gitaReading.selectTranslation')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {translations.map((translation) => (
+                    <SelectItem key={translation.id} value={translation.id}>
+                      {translation.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        <Button 
-          variant="outline" 
-          className="w-full justify-start"
-          onClick={() => {
-            toast.success("Coming Soon: Advanced preferences will be available soon!");
-          }}
-        >
-          <Settings className="mr-2" size={18} /> Advanced Preferences
-        </Button>
-      </div>
-
-      <div className="mt-8 text-center">
-        <p className="text-xs text-muted-foreground">App Version 1.0.1</p>
-        <p className="text-xs text-muted-foreground">Gita Wisdom App</p>
-      </div>
-
-      {/* Gita Reading Section */}
-      <div className="mt-8 space-y-6">
-        <h2 className="text-2xl font-bold">{t('gitaReading.title')}</h2>
-        
-        {/* Translation Selection */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
-            {t('gitaReading.selectTranslation')}
-          </label>
-          <Select
-            value={selectedTranslation}
-            onValueChange={setSelectedTranslation}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t('gitaReading.selectTranslation')} />
-            </SelectTrigger>
-            <SelectContent>
-              {translations.map((translation) => (
-                <SelectItem key={translation.id} value={translation.id}>
-                  {translation.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Translation Details */}
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            {translations.find(t => t.id === selectedTranslation) && (
-              <>
-                <h3 className="text-xl font-semibold">
-                  {translations.find(t => t.id === selectedTranslation)?.name}
-                </h3>
-                <p className="text-muted-foreground">
-                  {translations.find(t => t.id === selectedTranslation)?.author}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {translations.find(t => t.id === selectedTranslation)?.description}
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Chapters List */}
-        <div className="grid gap-4">
-          {chapters.map((chapter) => (
-            <Card key={chapter.id}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <h3 className="font-medium">{chapter.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {chapter.verses} {t('gitaReading.verses')}
+            {/* Translation Details */}
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                {translations.find(t => t.id === selectedTranslation) && (
+                  <>
+                    <h3 className="text-xl font-semibold">
+                      {translations.find(t => t.id === selectedTranslation)?.name}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {translations.find(t => t.id === selectedTranslation)?.author}
                     </p>
-                  </div>
-                  <Button
-                    onClick={() => handlePlayAudio(chapter)}
-                    variant={currentChapter?.id === chapter.id && isPlaying ? "secondary" : "default"}
-                    size="sm"
-                  >
-                    {currentChapter?.id === chapter.id && isPlaying
-                      ? t('gitaReading.pauseAudio')
-                      : t('gitaReading.playAudio')}
-                  </Button>
-                </div>
+                    <p className="text-sm text-muted-foreground">
+                      {translations.find(t => t.id === selectedTranslation)?.description}
+                    </p>
+                  </>
+                )}
               </CardContent>
             </Card>
-          ))}
-        </div>
-      </div>
 
-      {/* Audio Element */}
-      <audio
-        ref={audioRef}
-        onEnded={() => {
-          setIsPlaying(false);
-          setCurrentChapter(null);
-        }}
-      />
-
-      {/* ... existing quote dialog ... */}
+            {/* Chapters List */}
+            <div className="grid gap-4">
+              {chapters.map((chapter) => (
+                <Card key={chapter.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <h3 className="font-medium">{chapter.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {chapter.verses} {t('gitaReading.verses')}
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => handleReadChapter(chapter)}
+                        variant="default"
+                        size="sm"
+                      >
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        {t('gitaReading.readNow')}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

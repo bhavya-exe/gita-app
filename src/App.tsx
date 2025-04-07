@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -8,6 +9,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
 import Karma from "./pages/Karma";
+import { GitaReading } from "./pages/GitaReading";
 import Navbar from "@/components/Navbar";
 
 function App() {
@@ -22,6 +24,7 @@ function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/karma" element={<Karma />} />
+                <Route path="/gita-reading" element={<GitaReading />} />
               </Routes>
             </main>
             <Navbar />
