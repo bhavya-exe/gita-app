@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookMarked, Share2, LogIn, MessageCircle, RefreshCw, ArrowUpRight } from "lucide-react";
+import { BookMarked, Share2, LogIn, MessageCircle, RefreshCw, ArrowUpRight, MoonStar, Sun, Settings } from "lucide-react";
 import { toast } from 'sonner';
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import KarmaPreview from "@/components/KarmaPreview";
+import { useTheme } from "@/hooks/use-theme";
+import { SettingsMenu } from "@/components/SettingsMenu";
 
 interface DailyQuote {
   text: string;
@@ -32,6 +33,8 @@ export default function Home() {
   const navigate = useNavigate();
   const [dailyQuote, setDailyQuote] = useState<DailyQuote | null>(null);
   const { t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     // Simulate loading delay
@@ -127,28 +130,46 @@ export default function Home() {
     toast.success(t('quoteRefreshed'));
   };
 
-  // Format the date for display
   const formattedDate = format(currentDate, "EEEE, MMMM d");
 
   if (isLoading) {
     return (
       <div className="container max-w-md mx-auto p-4 space-y-6">
-        {/* Top Bar */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Namaste</h1>
+            <h1 className="text-2xl font-bold">
+              <span>Gita Wisdom</span>
+              <span className="ml-2 text-amber-900">ॐ</span>
+            </h1>
             <p className="text-muted-foreground">{format(currentDate, "EEEE, MMMM d")}</p>
           </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigate('/profile')}
-          >
-            <LogIn className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSettings(true)}
+              aria-label="Settings"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate('/profile')}
+            >
+              <LogIn className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
-        {/* Login Section */}
         <Card className="bg-primary/5">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -169,7 +190,6 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        {/* Featured Content */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold">Daily Wisdom</h2>
           <Card>
@@ -180,7 +200,6 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* Quick Actions */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold">Begin Your Journey</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -218,22 +237,43 @@ export default function Home() {
 
   return (
     <div className="container max-w-md mx-auto p-4 space-y-6">
-      {/* Top Bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Namaste</h1>
+          <h1 className="text-2xl font-bold">
+            <span>Gita Wisdom</span>
+            <span className="ml-2 text-amber-900">ॐ</span>
+          </h1>
           <p className="text-muted-foreground">{format(currentDate, "EEEE, MMMM d")}</p>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => navigate('/profile')}
-        >
-          <LogIn className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowSettings(true)}
+            aria-label="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigate('/profile')}
+          >
+            <LogIn className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
-      {/* Login Section */}
+      {showSettings && <SettingsMenu onClose={() => setShowSettings(false)} />}
+
       <Card className="bg-primary/5">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
@@ -254,13 +294,11 @@ export default function Home() {
         </CardContent>
       </Card>
 
-      {/* Karma Preview Section */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">Karma Tracker</h2>
         <KarmaPreview />
       </div>
 
-      {/* Featured Content */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">{t('dailyWisdom')}</h2>
@@ -311,7 +349,6 @@ export default function Home() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">{t('beginYourJourney')}</h2>
         <div className="grid grid-cols-1 gap-4">
